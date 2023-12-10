@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  workspace:
+    container_name: workspace
+    build:
+      context: .
+      dockerfile: dockerfile
+
+    # [Optional] Required for ptrace-based debuggers like C++, Go, and Rust
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    network_mode: "host"

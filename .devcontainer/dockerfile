@@ -1,0 +1,7 @@
+FROM mcr.microsoft.com/devcontainers/go:0-1.19
+
+# Install atlasGO
+RUN curl -sSf https://atlasgo.sh | sh
+
+# Install task
+RUN go install github.com/go-task/task/v3/cmd/task@latest
