@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+  up:
+    desc: Start docker compose containers
+    cmds:
+      - docker compose up -d
+  
+  down:
+    desc: Stop docker compose containers
+    cmds:
+      - docker compose down
+
+  logs:
+    desc: Show all logs from docker compose containers
+    cmds:
+      - docker compose logs
+
+  tail:
+    desc: Follow output from docker compose containers
+    cmds:
+      - docker compose logs --tail=0 --follow
+
+  term:
+    desc: Opens a shell in container matching NAME.
+    cmds:
+      - docker exec -it {{.NAME}} /bin/sh
+
+  ps:
+    desc: Show running processes for docker compose
+    cmds:
+      - docker compose ps

@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  apply:
+    desc: Apply local schema to postgres container
+    cmds:
+      - |
+        atlas schema apply \
+        -u "postgres://postgres:postgres@localhost:5432/?sslmode=disable" \
+        --to file://schema.sql \
+        --dev-url "docker://postgres/14.6"
+
+  inspect:
+    desc: Read schema from postgres container
+    cmds:
+      - |
+        atlas schema inspect \
+        --url "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
