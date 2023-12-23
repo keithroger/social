@@ -12,6 +12,8 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp:unconfined
+    environment:
+      - GOPATH=/home/vscode # fix allowing vscode user to run go mod commands
 
     volumes:
       - ..:/workspace:cached
