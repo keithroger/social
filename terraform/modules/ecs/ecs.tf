@@ -26,13 +26,13 @@ resource "aws_ecs_cluster_capacity_providers" "example" {
 }
 
 resource "aws_cloudwatch_log_group" "cluster_log_group" {
-  name = "${var.app_name}-cluster-log-group"
+  name = "${var.name}-cluster-log-group"
 }
 
 # define the ecs task definition for the service
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family       = "my-ecs-task"
-  network_mode = "awsvpc"
+  family             = "my-ecs-task"
+  network_mode       = "awsvpc"
   execution_role_arn = aws_iam_role.ecs-execution-role.arn
   cpu                = 256
   runtime_platform {
@@ -41,16 +41,16 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   }
   container_definitions = jsonencode([
     {
-      name      = "${var.app_name}-server"
-      image     = "${aws_ecr_repository.ecr.repository_url}:latest"
+      name      = "${var.name}-server"
+      image     = "${var.repository_url}"
       cpu       = 256
       memory    = 512
       essential = true
       portmappings = [
         {
           containerport = 8080
-          hostport      = 8080
-          protocol      = "tcp"
+          # hostport      = 0
+          protocol = "tcp"
         }
       ]
     }
@@ -71,8 +71,11 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "ecs-execution-role" {
-  name               = "${var.app_name}-ecs-execution-role"
+  name               = "${var.name}-ecs-execution-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  tags = {
+    name = "${var.name}-ecs-excecution-role"
+  }
 }
 
 data "aws_iam_policy_document" "policy" {
@@ -91,9 +94,12 @@ data "aws_iam_policy_document" "policy" {
 }
 
 resource "aws_iam_policy" "policy" {
-  name        = "${var.app_name}-ecs-policy"
+  name        = "${var.name}-ecs-policy"
   description = "Allow application to pull from ECR and write to Cloud Watch"
   policy      = data.aws_iam_policy_document.policy.json
+  tags = {
+    name = "${var.name}-ecs-policy"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "test-attach" {
@@ -103,16 +109,16 @@ resource "aws_iam_role_policy_attachment" "test-attach" {
 
 # Cloud Map namesspace
 resource "aws_service_discovery_private_dns_namespace" "private_dns" {
-  name        = "${var.app_name}-dns"
+  name        = "${var.name}-dns"
   description = "service discovery endpoint"
-  vpc         = aws_vpc.main.id
+  vpc         = var.vpc
   tags = {
-    name = "${var.app_name}-cloud-map-dns"
+    name = "${var.name}-service-discovery-dns"
   }
 }
 
 resource "aws_service_discovery_service" "service_discovery" {
-  name = "${var.app_name}-discovery"
+  name = "${var.name}-discovery"
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.private_dns.id
     dns_records {
@@ -129,23 +135,28 @@ resource "aws_service_discovery_service" "service_discovery" {
     failure_threshold = 3
   }
   tags = {
-    name = "${var.app_name}-cloud-map-service"
+    name = "${var.name}-service-discovery-service"
   }
+}
+
+resource "aws_service_discovery_http_namespace" "namespace" {
+  name        = "social"
+  description = "namespace for ${var.name}"
 }
 
 
 resource "aws_ecs_cluster" "ecs_cluster" {
-  name = "${var.app_name}-cluster"
+  name = "${var.name}-cluster"
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
   configuration {
     execute_command_configuration {
-      logging    = "OVERRIDE"
+      logging = "OVERRIDE"
 
       log_configuration {
-        cloud_watch_log_group_name     = aws_cloudwatch_log_group.cluster_log_group.name
+        cloud_watch_log_group_name = aws_cloudwatch_log_group.cluster_log_group.name
       }
     }
   }
@@ -153,15 +164,14 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 resource "aws_ecs_service" "ecs_service" {
 
-  name            = "${var.app_name}-service"
+  name            = "${var.name}-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 3
 
   network_configuration {
-    subnets          = aws_subnet.private.*.id
-    security_groups  = [aws_security_group.security_group.id]
-    # assign_public_ip = false
+    subnets         = var.subnets
+    security_groups = [aws_security_group.sg.id]
   }
 
   force_new_deployment = true
@@ -171,10 +181,6 @@ resource "aws_ecs_service" "ecs_service" {
     field = "cpu"
   }
 
-  # placement_constraints {
-  #   type = "distinctInstance"
-  # }
-
   triggers = {
     redeployment = timestamp()
   }
@@ -183,9 +189,11 @@ resource "aws_ecs_service" "ecs_service" {
     capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider.name
     weight            = 100
   }
-  service_registries {
-    registry_arn = aws_service_discovery_service.service_discovery.arn
-    port = 8080
+
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = "${var.name}-server"
+    container_port   = 8080
   }
 
   lifecycle {

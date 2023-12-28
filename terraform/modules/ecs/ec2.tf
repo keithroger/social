@@ -24,7 +24,7 @@ resource "aws_launch_template" "ecs_lt" {
   image_id      = data.aws_ami.amazon_linux_2.id
   instance_type = "t3.micro"
 
-  vpc_security_group_ids = [aws_security_group.security_group.id]
+  vpc_security_group_ids = [aws_security_group.sg.id]
   iam_instance_profile {
     arn = aws_iam_instance_profile.ecs_instance_profile.arn
   }
@@ -36,7 +36,12 @@ resource "aws_launch_template" "ecs_lt" {
     }
   }
 
-  user_data = filebase64("${path.module}/ecs.sh")
+  user_data = base64encode(<<EOT
+  #!/bin/bash
+  echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.name} >> /etc/ecs/ecs.config
+  EOT
+  )
+  # user_data = filebase64("${path.module}/ecs.sh")
 }
 
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
@@ -45,7 +50,7 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
 }
 
 resource "aws_iam_role" "ecs_iam_role" {
-  name = "test_role"
+  name               = "test_role"
   assume_role_policy = data.aws_iam_policy_document.ec2_instance_role_policy.json
 }
 
@@ -60,7 +65,7 @@ data "aws_iam_policy_document" "ec2_instance_role_policy" {
     effect  = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = [
         "ec2.amazonaws.com",
         "ecs.amazonaws.com"
@@ -71,7 +76,7 @@ data "aws_iam_policy_document" "ec2_instance_role_policy" {
 
 
 resource "aws_autoscaling_group" "ecs_asg" {
-  vpc_zone_identifier = aws_subnet.private.*.id
+  vpc_zone_identifier = var.subnets
   desired_capacity    = 1
   max_size            = 3
   min_size            = 1
@@ -79,6 +84,10 @@ resource "aws_autoscaling_group" "ecs_asg" {
   launch_template {
     id      = aws_launch_template.ecs_lt.id
     version = "$Latest"
+  }
+
+  lifecycle {
+    ignore_changes = [desired_capacity]
   }
 
   tag {
