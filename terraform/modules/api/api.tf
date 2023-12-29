@@ -63,6 +63,26 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
   auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.access_logs.arn
+    format = jsonencode({
+      requestId         = "$context.requestId",
+      extendedRequestId = "$context.extendedRequestId"
+      ip                = "$context.identity.sourceIp"
+      caller            = "$context.identity.caller"
+      user              = "$context.identity.user"
+      requestTime       = "$context.requestTime"
+      httpMethod        = "$context.httpMethod"
+      resourcePath      = "$context.resourcePath"
+      status            = "$context.status"
+      protocol          = "$context.protocol"
+      responseLength    = "$context.responseLength"
+      }
+    )
+  }
 }
 
-
+resource "aws_cloudwatch_log_group" "access_logs" {
+  name = "${var.name}-access-log-group"
+}
