@@ -45,3 +45,12 @@ module "api" {
   certificate_arn         = var.certificate_arn
   route_53_hosted_zone_id = var.route_53_hosted_zone_id
 }
+
+module "rds" {
+  source = "./modules/rds"
+
+  name = "${var.app_name}-rds-aurora"
+  availability_zones = var.availability_zones
+  vpc = module.vpc.vpc_id
+  subnets = module.vpc.private_subnets
+}
