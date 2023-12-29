@@ -71,28 +71,3 @@ resource "aws_route_table_association" "private_route" {
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = aws_route_table.private_route_table.id
 }
-
-resource "aws_security_group" "security_group" {
-  name   = "ecs-security-group"
-  vpc_id = aws_vpc.vpc.id
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    self        = "false"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "any"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    name = "${var.name}-security-group"
-  }
-}
