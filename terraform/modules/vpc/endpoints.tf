@@ -45,6 +45,7 @@ resource "aws_vpc_endpoint" "cloud-map-discovery-2" {
     "com.amazonaws.${var.region}.ecs",
     "com.amazonaws.${var.region}.ecs-agent",
     "com.amazonaws.${var.region}.ecs-telemetry",
+    "com.amazonaws.${var.region}.secretsmanager"
     # "com.amazonaws.${var.region}.servicediscovery",
     # "com.amazonaws.${var.region}.servicediscovery-fips",
     # "com.amazonaws.${var.region}.data-servicediscovery",

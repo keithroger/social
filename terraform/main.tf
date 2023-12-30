@@ -14,7 +14,7 @@ module "alb" {
   vpc             = module.vpc.vpc_id
   subnets         = module.vpc.private_subnets
   certificate_arn = var.certificate_arn
-  vpc_link_sg_id = module.api.vpc_link_sg_id
+  vpc_link_sg_id  = module.api.vpc_link_sg_id
 }
 
 module "ecr" {
@@ -26,12 +26,14 @@ module "ecr" {
 module "ecs" {
   source = "./modules/ecs"
 
-  name    = "${var.app_name}-ecs"
-  vpc     = module.vpc.vpc_id
-  subnets = module.vpc.private_subnets
-  repository_url = "${module.ecr.repository_url}:latest"
+  name                = "${var.app_name}-ecs"
+  region              = var.region
+  vpc                 = module.vpc.vpc_id
+  subnets             = module.vpc.private_subnets
+  repository_url      = "${module.ecr.repository_url}:latest"
   target_group_arn    = module.alb.target_group_arn
   load_balancer_sg_id = module.alb.load_balancer_sg_id
+  postgres_secret_arn = module.rds.postgres_secret_arn
 }
 
 module "api" {
@@ -49,8 +51,8 @@ module "api" {
 module "rds" {
   source = "./modules/rds"
 
-  name = "${var.app_name}-rds-aurora"
+  name               = "${var.app_name}-rds-aurora"
   availability_zones = var.availability_zones
-  vpc = module.vpc.vpc_id
-  subnets = module.vpc.private_subnets
+  vpc                = module.vpc.vpc_id
+  subnets            = module.vpc.private_subnets
 }

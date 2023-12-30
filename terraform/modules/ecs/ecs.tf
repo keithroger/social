@@ -53,8 +53,28 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
           protocol = "tcp"
         }
       ]
+      secrets = [{
+        name      = "POSTGRES_SECRET",
+        valueFrom = "${var.postgres_secret_arn}:password::"
+      }]
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group        = "${aws_cloudwatch_log_group.task_log_group.name}",
+          awslogs-region       = "${var.region}",
+          awslogs-create-group = "true",
+        }
+      }
     }
   ])
+}
+
+resource "aws_cloudwatch_log_group" "task_log_group" {
+  name = "${var.name}-task-logs"
+
+  tags = {
+    name = "${var.name}-task-logs"
+  }
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -87,7 +107,8 @@ data "aws_iam_policy_document" "policy" {
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "secretsmanager:GetSecretValue"
     ]
     resources = ["*"]
   }
