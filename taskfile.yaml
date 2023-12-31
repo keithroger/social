@@ -1,6 +1,10 @@
 version: '3'
 
 tasks:
+  build:
+    desc: Build containers that use a dockerfile
+    cmds:
+      - docker compose build
   up:
     desc: Start docker compose containers
     cmds:
