@@ -8,22 +8,22 @@ tasks:
   up:
     desc: Start docker compose containers
     cmds:
-      - docker compose up -d
+      - docker compose up -d {{.CLI_ARGS}}
   
   down:
     desc: Stop docker compose containers
     cmds:
-      - docker compose down
+      - docker compose down {{.CLI_ARGS}}
 
   logs:
     desc: Show all logs from docker compose containers
     cmds:
-      - docker compose logs
+      - docker compose logs {{.CLI_ARGS}}
 
   tail:
     desc: Follow output from docker compose containers
     cmds:
-      - docker compose logs --tail=0 --follow
+      - docker compose logs --tail=0 --follow {{.CLI_ARGS}}
 
   term:
     desc: Opens a shell in container matching NAME.
