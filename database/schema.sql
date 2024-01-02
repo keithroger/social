@@ -2,7 +2,7 @@ CREATE TABLE users(
      user_id BIGSERIAL,
      username VARCHAR (20) NOT NULL,
      profile_name VARCHAR (50),
-     date_created TIMESTAMPTZ,
+     date_created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
      PRIMARY KEY (user_id)
 );
 
