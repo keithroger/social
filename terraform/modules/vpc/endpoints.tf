@@ -24,9 +24,6 @@ resource "aws_vpc_security_group_egress_rule" "vpc_endpoint_sg_egress" {
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = aws_vpc.vpc.id
   service_name = "com.amazonaws.${var.region}.s3"
-  # route_table_ids   = 
-  # security_group_ids  = [aws_security_group.vpc_endpoint_sg.id]
-  # subnet_ids = aws_subnet.private.*.id
   route_table_ids   = [aws_route_table.private_route_table.id]
   auto_accept       = true
   vpc_endpoint_type = "Gateway"
@@ -36,20 +33,19 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 # Interface endpoints
-resource "aws_vpc_endpoint" "cloud-map-discovery-2" {
+resource "aws_vpc_endpoint" "this" {
   for_each = toset([
-    # "com.amazonaws.${var.region}.execute-api",
+    # CloudWatch Logs
     "com.amazonaws.${var.region}.logs",
+    # ECR
     "com.amazonaws.${var.region}.ecr.api",
     "com.amazonaws.${var.region}.ecr.dkr",
+    # ECS
     "com.amazonaws.${var.region}.ecs",
     "com.amazonaws.${var.region}.ecs-agent",
     "com.amazonaws.${var.region}.ecs-telemetry",
+    # Secrets Manager
     "com.amazonaws.${var.region}.secretsmanager"
-    # "com.amazonaws.${var.region}.servicediscovery",
-    # "com.amazonaws.${var.region}.servicediscovery-fips",
-    # "com.amazonaws.${var.region}.data-servicediscovery",
-    # "com.amazonaws.${var.region}.data-servicediscovery-fips",
   ])
   vpc_id              = aws_vpc.vpc.id
   service_name        = each.value

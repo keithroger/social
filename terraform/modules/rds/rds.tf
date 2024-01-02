@@ -3,13 +3,14 @@ resource "aws_rds_cluster" "postgres" {
   availability_zones          = var.availability_zones
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
-  database_name               = "postgres"
+  database_name               = "social"
   master_username             = "postgres"
   manage_master_user_password = true
   backup_retention_period     = 7
   preferred_backup_window     = "09:00-11:00"
   skip_final_snapshot         = true
   db_subnet_group_name        = aws_db_subnet_group.this.name
+  vpc_security_group_ids = [aws_security_group.this.id]
 
   serverlessv2_scaling_configuration {
     max_capacity = 2.0

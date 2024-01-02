@@ -17,3 +17,7 @@ variable "subnets" {
   description = "List of subnets to deploy load balancer"
   type        = list(string)
 }
+
+variable "ecs_sg_id" {
+  description = "ECS security group id for recieving ingress traffic"
+}

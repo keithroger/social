@@ -44,7 +44,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
       name      = "${var.name}-server"
       image     = "${var.repository_url}"
       cpu       = 256
-      memory    = 512
+      memory    = 900
       essential = true
       portmappings = [
         {
@@ -53,10 +53,29 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
           protocol = "tcp"
         }
       ]
+      environment = [
+        {
+          name  = "POSTGRES_READ_WRITE_ENDPOINT",
+          value = var.postgres_read_write_endpoint
+        },
+        {
+          name  = "POSTGRES_READ_ENDPOINT",
+          value = var.postgres_read_endpoint
+        },
+        {
+          name  = "POSTGRES_DB",
+          value = var.postgres_db
+        },
+        {
+          name  = "POSTGRES_USER",
+          value = var.postgres_user
+        },
+      ]
       secrets = [{
-        name      = "POSTGRES_SECRET",
+        name      = "POSTGRES_PASSWORD",
         valueFrom = "${var.postgres_secret_arn}:password::"
       }]
+      # command: [ "CMD-SHELL", "curl -f http://localhost/health/ || exit 1" ]
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -128,42 +147,42 @@ resource "aws_iam_role_policy_attachment" "test-attach" {
   policy_arn = aws_iam_policy.policy.arn
 }
 
-# Cloud Map namesspace
-resource "aws_service_discovery_private_dns_namespace" "private_dns" {
-  name        = "${var.name}-dns"
-  description = "service discovery endpoint"
-  vpc         = var.vpc
-  tags = {
-    name = "${var.name}-service-discovery-dns"
-  }
-}
+# # Cloud Map namesspace
+# resource "aws_service_discovery_private_dns_namespace" "private_dns" {
+#   name        = "${var.name}-dns"
+#   description = "service discovery endpoint"
+#   vpc         = var.vpc
+#   tags = {
+#     name = "${var.name}-service-discovery-dns"
+#   }
+# }
 
-resource "aws_service_discovery_service" "service_discovery" {
-  name = "${var.name}-discovery"
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.private_dns.id
-    dns_records {
-      ttl  = 10
-      type = "A"
-    }
-    dns_records {
-      ttl  = 10
-      type = "SRV"
-    }
-    routing_policy = "MULTIVALUE"
-  }
-  health_check_custom_config {
-    failure_threshold = 3
-  }
-  tags = {
-    name = "${var.name}-service-discovery-service"
-  }
-}
+# resource "aws_service_discovery_service" "service_discovery" {
+#   name = "${var.name}-discovery"
+#   dns_config {
+#     namespace_id = aws_service_discovery_private_dns_namespace.private_dns.id
+#     dns_records {
+#       ttl  = 10
+#       type = "A"
+#     }
+#     dns_records {
+#       ttl  = 10
+#       type = "SRV"
+#     }
+#     routing_policy = "MULTIVALUE"
+#   }
+#   health_check_custom_config {
+#     failure_threshold = 3
+#   }
+#   tags = {
+#     name = "${var.name}-service-discovery-service"
+#   }
+# }
 
-resource "aws_service_discovery_http_namespace" "namespace" {
-  name        = "social"
-  description = "namespace for ${var.name}"
-}
+# resource "aws_service_discovery_http_namespace" "namespace" {
+#   name        = "social"
+#   description = "namespace for ${var.name}"
+# }
 
 
 resource "aws_ecs_cluster" "ecs_cluster" {
@@ -192,7 +211,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   network_configuration {
     subnets         = var.subnets
-    security_groups = [aws_security_group.sg.id]
+    security_groups = [aws_security_group.this.id]
   }
 
   force_new_deployment = true

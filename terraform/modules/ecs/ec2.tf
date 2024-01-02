@@ -24,7 +24,7 @@ resource "aws_launch_template" "ecs_lt" {
   image_id      = data.aws_ami.amazon_linux_2.id
   instance_type = "t3.micro"
 
-  vpc_security_group_ids = [aws_security_group.sg.id]
+  vpc_security_group_ids = [aws_security_group.this.id]
   iam_instance_profile {
     arn = aws_iam_instance_profile.ecs_instance_profile.arn
   }

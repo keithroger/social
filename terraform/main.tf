@@ -33,6 +33,11 @@ module "ecs" {
   repository_url      = "${module.ecr.repository_url}:latest"
   target_group_arn    = module.alb.target_group_arn
   load_balancer_sg_id = module.alb.load_balancer_sg_id
+  rds_sg_id = module.rds.sg_id
+  postgres_read_write_endpoint = module.rds.postgres_read_write_endpoint
+  postgres_read_endpoint = module.rds.postgres_read_endpoint
+  postgres_db = module.rds.postgres_db
+  postgres_user = module.rds.postgres_user
   postgres_secret_arn = module.rds.postgres_secret_arn
 }
 
@@ -55,4 +60,5 @@ module "rds" {
   availability_zones = var.availability_zones
   vpc                = module.vpc.vpc_id
   subnets            = module.vpc.private_subnets
+  ecs_sg_id = module.ecs.ecs_sg_id
 }

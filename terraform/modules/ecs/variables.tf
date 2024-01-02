@@ -33,6 +33,31 @@ variable "load_balancer_sg_id" {
   type        = string
 }
 
+variable "rds_sg_id" {
+  description = "RDS security group id to allow egress traffic"
+  type = string
+}
+
+variable "postgres_read_write_endpoint" {
+  description = "Host used to connect the postgres reader/writer client"
+  type = string
+}
+
+variable "postgres_read_endpoint" {
+  description = "Host used to connect the postgres reader client"
+  type = string
+}
+
+variable "postgres_db" {
+  description = "Name of the postgres database to connect to"
+  type = string
+}
+
+variable "postgres_user" {
+  description = "Name of the user used to access postgres"
+  type = string
+}
+
 variable "postgres_secret_arn" {
   description = "Secret arn for accessing postgress password"
   type = string
