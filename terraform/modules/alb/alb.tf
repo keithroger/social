@@ -33,6 +33,6 @@ resource "aws_lb_target_group" "ecs_tg" {
   vpc_id      = var.vpc
 
   health_check {
-    path = "/"
+    path = "/health"
   }
 }
