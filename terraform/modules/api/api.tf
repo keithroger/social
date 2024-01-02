@@ -7,16 +7,9 @@ resource "aws_apigatewayv2_api" "this" {
   }
 }
 
-resource "aws_apigatewayv2_route" "ecs_nlb" {
+resource "aws_apigatewayv2_route" "this" {
   api_id    = aws_apigatewayv2_api.this.id
-  route_key = "ANY /test"
-
-  target = "integrations/${aws_apigatewayv2_integration.ecs_nlb.id}"
-}
-
-resource "aws_apigatewayv2_route" "test_route" {
-  api_id    = aws_apigatewayv2_api.this.id
-  route_key = "ANY /"
+  route_key = "ANY /{proxy+}"
 
   target = "integrations/${aws_apigatewayv2_integration.ecs_nlb.id}"
 }
