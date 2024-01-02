@@ -34,7 +34,7 @@ func initDbData(db *sql.DB, t *testing.T) {
 	}
 }
 
-func TestCreateUser(t *testing.T) {
+func TestCreateUserHandler(t *testing.T) {
 	db, err := initDbConnection()
 	if err != nil {
 		t.Fatalf("initial db connection failed: %v", err)
@@ -109,7 +109,7 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func TestGetUser(t *testing.T) {
+func TestGetUserHandler(t *testing.T) {
 	db, err := initDbConnection()
 	if err != nil {
 		t.Fatalf("initial db connection failed: %v", err)
@@ -125,15 +125,15 @@ func TestGetUser(t *testing.T) {
 		name                string
 		method              string
 		path                string
-		pathVars            map[string]string
+		queryParams         map[string]string
 		expectedGetUserResp GetUserResp
 		expectedStatusCode  int
 	}{
 		{
-			name:     "GetUser",
-			method:   http.MethodGet,
-			path:     "users/3",
-			pathVars: map[string]string{"id": "3"},
+			name:        "GetUser",
+			method:      http.MethodGet,
+			path:        "users/3",
+			queryParams: map[string]string{"id": "3"},
 			expectedGetUserResp: GetUserResp{
 				Username:    "smith",
 				ProfileName: "Elizabeth Smith",
@@ -150,8 +150,8 @@ func TestGetUser(t *testing.T) {
 				t.Errorf("failed to create request: %v", err)
 			}
 
-			// Set path variables
-			req = mux.SetURLVars(req, testCase.pathVars)
+			// Set query parameters
+			req = mux.SetURLVars(req, testCase.queryParams)
 
 			// Record response
 			respRecorder := httptest.NewRecorder()
@@ -186,6 +186,124 @@ func TestGetUser(t *testing.T) {
 			}
 
 			t.Logf("json response: %v", getUserResp)
+		})
+	}
+}
+
+func TestUpdateUserHandler(t *testing.T) {
+	db, err := initDbConnection()
+	if err != nil {
+		t.Fatalf("initial db connection failed: %v", err)
+	}
+	defer db.Close()
+
+	initDbData(db, t)
+	if err != nil {
+		t.Errorf("failed to connect to postgres: %v", err)
+	}
+
+	testCases := []struct {
+		name               string
+		method             string
+		path               string
+		queryParams        map[string]string
+		updateUserReq      UpdateUserReq
+		expectedStatusCode int
+	}{
+		{
+			name:        "Update User",
+			method:      http.MethodPut,
+			path:        "users/2",
+			queryParams: map[string]string{"id": "2"},
+			updateUserReq: UpdateUserReq{
+				Username:    "Lizzy",
+				ProfileName: "Lizabeth Smith",
+			},
+			expectedStatusCode: http.StatusOK,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Marshal request to json
+			jsonReq, err := json.Marshal(testCase.updateUserReq)
+			if err != nil {
+				t.Fatalf("Failed to marshal update user request: %v", err)
+			}
+
+			t.Logf("json request: %v", string(jsonReq))
+
+			// Create test request
+			body := bytes.NewReader(jsonReq)
+			req, err := http.NewRequest(testCase.method, testCase.path, body)
+			if err != nil {
+				t.Errorf("failed to create request: %v", err)
+			}
+
+			// Set query parameters
+			req = mux.SetURLVars(req, testCase.queryParams)
+
+			// Record response
+			respRecorder := httptest.NewRecorder()
+			handler := updateUserHandler(db)
+			handler.ServeHTTP(respRecorder, req)
+
+			// Check status code
+			if respRecorder.Code != testCase.expectedStatusCode {
+				t.Errorf("got: %v, want: %v", respRecorder.Code, testCase.expectedStatusCode)
+			}
+		})
+	}
+}
+
+func TestDeleteUserHandler(t *testing.T) {
+	db, err := initDbConnection()
+	if err != nil {
+		t.Fatalf("initial db connection failed: %v", err)
+	}
+	defer db.Close()
+
+	initDbData(db, t)
+	if err != nil {
+		t.Errorf("failed to connect to postgres: %v", err)
+	}
+
+	testCases := []struct {
+		name               string
+		method             string
+		path               string
+		queryParams        map[string]string
+		expectedStatusCode int
+	}{
+		{
+			name:        "Update User",
+			method:      http.MethodPut,
+			path:        "users/2",
+			queryParams: map[string]string{"id": "2"},
+			expectedStatusCode: http.StatusOK,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Create test request
+			req, err := http.NewRequest(testCase.method, testCase.path, nil)
+			if err != nil {
+				t.Errorf("failed to create request: %v", err)
+			}
+
+			// Set query parameters
+			req = mux.SetURLVars(req, testCase.queryParams)
+
+			// Record response
+			respRecorder := httptest.NewRecorder()
+			handler := deleteUserHandler(db)
+			handler.ServeHTTP(respRecorder, req)
+
+			// Check status code
+			if respRecorder.Code != testCase.expectedStatusCode {
+				t.Errorf("got: %v, want: %v", respRecorder.Code, testCase.expectedStatusCode)
+			}
 		})
 	}
 }

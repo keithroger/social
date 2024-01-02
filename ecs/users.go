@@ -57,13 +57,15 @@ type GetUserResp struct {
 // getUserHandler gets a user
 func getUserHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		vars := mux.Vars(req)
+		// Get query queryParams
+		queryParams := mux.Vars(req)
 
 		var getUserResp GetUserResp
 
 		query := "SELECT username, profile_name FROM users WHERE user_id = $1"
 
-		err := db.QueryRow(query, vars["id"]).
+		// Query Database
+		err := db.QueryRow(query, queryParams["id"]).
 			Scan(&getUserResp.Username, &getUserResp.ProfileName)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -75,14 +77,51 @@ func getUserHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+type UpdateUserReq struct {
+	Username    string `json:"username"`
+	ProfileName string `json:"profileName"`
+}
+
 // updateUserHandler updates a user
 func updateUserHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		// Get query queryParams
+		queryParams := mux.Vars(req)
+
+		// Limit request size
+		req.Body = http.MaxBytesReader(w, req.Body, 1<<10) // 1KB
+
+		var updateUserReq UpdateUserReq
+
+		// Parse json request
+		err := json.NewDecoder(req.Body).Decode(&updateUserReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Insert row into db and get generated user id
+		query := "UPDATE users SET username = $1, profile_name=$2 WHERE user_id=$3"
+		_, err = db.Exec(query, updateUserReq.Username, updateUserReq.ProfileName, queryParams["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
 // deleteUserHandler deletes a user
 func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		// Get query queryParams
+		queryParams := mux.Vars(req)
+
+		// Delete row from db
+		query := "DELETE FROM users WHERE user_id = $1"
+		_, err := db.Exec(query, queryParams["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }

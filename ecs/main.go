@@ -30,6 +30,8 @@ func main() {
 	}
 	defer db.Close()
 
+	fmt.Println("Connected to database")
+
 	r := mux.NewRouter()
 
 	// /users api handlers
@@ -38,13 +40,13 @@ func main() {
 	r.HandleFunc("/users/{id:[0-9]+}", updateUserHandler(db)).Methods(http.MethodPut)
 	r.HandleFunc("/users/{id:[0-9]+}", deleteUserHandler(db)).Methods(http.MethodDelete)
 
+	// health check
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {})
 
 	err = http.ListenAndServe(":8080", r)
 	if err != nil {
 		fmt.Printf("error starting server: %v\n", err)
 	}
-
 }
 
 // initDbConnection creates a new connection to the postgres database.
