@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +12,7 @@ import (
 )
 
 // initData resets and initializes database
-func initDbData(db *sql.DB, t *testing.T) {
+func initDbData(t *testing.T) {
 	// Reset all records
 	// _, err := db.Exec("")
 	_, err := db.Exec("DELETE FROM users; ALTER SEQUENCE users_user_id_seq RESTART")
@@ -35,13 +34,13 @@ func initDbData(db *sql.DB, t *testing.T) {
 }
 
 func TestCreateUserHandler(t *testing.T) {
-	db, err := initDbConnection()
+	err := initDbConnection()
 	if err != nil {
 		t.Fatalf("initial db connection failed: %v", err)
 	}
 	defer db.Close()
 
-	initDbData(db, t)
+	initDbData(t)
 	if err != nil {
 		t.Errorf("failed to connect to postgres: %v", err)
 	}
@@ -84,8 +83,7 @@ func TestCreateUserHandler(t *testing.T) {
 
 			// Record response
 			respRecorder := httptest.NewRecorder()
-			handler := createUserHandler(db)
-			handler.ServeHTTP(respRecorder, req)
+			createUserHandler(respRecorder, req)
 
 			// Check status code
 			if respRecorder.Code != testCase.expectedStatusCode {
@@ -110,13 +108,13 @@ func TestCreateUserHandler(t *testing.T) {
 }
 
 func TestGetUserHandler(t *testing.T) {
-	db, err := initDbConnection()
+	err := initDbConnection()
 	if err != nil {
 		t.Fatalf("initial db connection failed: %v", err)
 	}
 	defer db.Close()
 
-	initDbData(db, t)
+	initDbData(t)
 	if err != nil {
 		t.Errorf("failed to connect to postgres: %v", err)
 	}
@@ -155,8 +153,7 @@ func TestGetUserHandler(t *testing.T) {
 
 			// Record response
 			respRecorder := httptest.NewRecorder()
-			handler := getUserHandler(db)
-			handler.ServeHTTP(respRecorder, req)
+			getUserHandler(respRecorder, req)
 
 			// Check status code
 			if respRecorder.Code != testCase.expectedStatusCode {
@@ -191,13 +188,13 @@ func TestGetUserHandler(t *testing.T) {
 }
 
 func TestUpdateUserHandler(t *testing.T) {
-	db, err := initDbConnection()
+	err := initDbConnection()
 	if err != nil {
 		t.Fatalf("initial db connection failed: %v", err)
 	}
 	defer db.Close()
 
-	initDbData(db, t)
+	initDbData(t)
 	if err != nil {
 		t.Errorf("failed to connect to postgres: %v", err)
 	}
@@ -245,8 +242,7 @@ func TestUpdateUserHandler(t *testing.T) {
 
 			// Record response
 			respRecorder := httptest.NewRecorder()
-			handler := updateUserHandler(db)
-			handler.ServeHTTP(respRecorder, req)
+			updateUserHandler(respRecorder, req)
 
 			// Check status code
 			if respRecorder.Code != testCase.expectedStatusCode {
@@ -257,13 +253,13 @@ func TestUpdateUserHandler(t *testing.T) {
 }
 
 func TestDeleteUserHandler(t *testing.T) {
-	db, err := initDbConnection()
+	err := initDbConnection()
 	if err != nil {
 		t.Fatalf("initial db connection failed: %v", err)
 	}
 	defer db.Close()
 
-	initDbData(db, t)
+	initDbData(t)
 	if err != nil {
 		t.Errorf("failed to connect to postgres: %v", err)
 	}
@@ -276,10 +272,10 @@ func TestDeleteUserHandler(t *testing.T) {
 		expectedStatusCode int
 	}{
 		{
-			name:        "Update User",
-			method:      http.MethodPut,
-			path:        "users/2",
-			queryParams: map[string]string{"id": "2"},
+			name:               "Update User",
+			method:             http.MethodPut,
+			path:               "users/2",
+			queryParams:        map[string]string{"id": "2"},
 			expectedStatusCode: http.StatusOK,
 		},
 	}
@@ -297,8 +293,7 @@ func TestDeleteUserHandler(t *testing.T) {
 
 			// Record response
 			respRecorder := httptest.NewRecorder()
-			handler := deleteUserHandler(db)
-			handler.ServeHTTP(respRecorder, req)
+			deleteUserHandler(respRecorder, req)
 
 			// Check status code
 			if respRecorder.Code != testCase.expectedStatusCode {
