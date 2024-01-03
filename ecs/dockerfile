@@ -1,0 +1,30 @@
+FROM golang:1.19 AS builder
+
+# Set destination for COPY
+WORKDIR /app
+
+# Download Go files
+COPY go.mod go.sum *.go ./
+COPY posts/ ./posts/
+
+# COPY . .
+
+# Download requirements
+RUN go mod download
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -o /main
+
+FROM alpine:3.19
+
+WORKDIR /app
+
+COPY --from=builder /main /main
+
+# Add curl for health check
+RUN apk --no-cache add curl
+
+EXPOSE 8080
+
+# Run
+CMD ["/main"]
