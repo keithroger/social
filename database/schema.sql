@@ -7,12 +7,12 @@ CREATE TABLE users(
 );
 
 CREATE TABLE followers (
-     follower BIGSERIAL,
-     followee BIGSERIAL,
-     date_created TIMESTAMPTZ,
-     FOREIGN KEY(follower) REFERENCES users(user_id),
-     FOREIGN KEY(followee) REFERENCES users(user_id),
-     PRIMARY KEY (follower, followee)
+     follower_id BIGSERIAL,
+     followee_id BIGSERIAL,
+     date_created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+     FOREIGN KEY(follower_id) REFERENCES users(user_id) ON DELETE CASCADE,
+     FOREIGN KEY(followee_id) REFERENCES users(user_id) ON DELETE CASCADE,
+     PRIMARY KEY (follower_id, followee_id)
 );
 
 CREATE TABLE posts (
@@ -20,7 +20,7 @@ CREATE TABLE posts (
      user_id BIGSERIAL,
      msg VARCHAR(300),
      likes INT,
-     date_created TIMESTAMPTZ,
+     date_created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
      FOREIGN KEY(user_id) REFERENCES users(user_id),
      PRIMARY KEY (post_id)
 );
@@ -38,7 +38,7 @@ CREATE TABLE comments (
      post_id BIGSERIAL,
      user_id INT NOT NULL,
      msg VARCHAR(300),
-     date_created TIMESTAMPTZ,
+     date_created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
      FOREIGN KEY(post_id) REFERENCES posts(post_id),
      FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
