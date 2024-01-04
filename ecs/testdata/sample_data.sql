@@ -1,3 +1,8 @@
+
+DELETE FROM users;
+ALTER SEQUENCE users_user_id_seq RESTART;
+ALTER SEQUENCE posts_post_id_seq RESTART;
+ALTER SEQUENCE comments_comment_id_seq RESTART;
 -- Users
 INSERT INTO
     users(username, profile_name)
@@ -49,3 +54,28 @@ VALUES
     (4, 11),
     (4, 12),
     (4, 13);
+
+
+INSERT INTO posts(user_id, body, likes)
+VALUES
+(1, 'Some body content', 0),
+(1, 'more content by user 1', 0),
+(1, 'more', 0),
+(1, 'more', 0),
+(2, 'Some more posting', 0),
+(3, 'A third post', 0),
+(4, 'Fourth post',  0),
+(5, 'Fifth post', 0),
+(6, 'Sixth post', 0),
+(7, 'Seventh post', 0);
+
+INSERT INTO comments(post_id, user_id, body)
+ VALUES
+ (2, 4, 'first comment'),
+ (2, 4, 'second comment'),
+ (2, 4, 'third comment'),
+ (2, 4, 'fourth comment'),
+ (2, 4, 'fifth comment'),
+ (2, 4, 'sixth comment'),
+ (2, 4, 'seventh comment'),
+ (2, 4, 'eighth comment');
