@@ -13,14 +13,7 @@ import (
 
 // initData resets and initializes database
 func initDbData(t *testing.T) {
-	// Reset all records
-	// _, err := db.Exec("")
-	_, err := db.Exec("DELETE FROM users; ALTER SEQUENCE users_user_id_seq RESTART")
-	if err != nil {
-		t.Fatalf("failed to reset database: %v", err)
-	}
-
-	// Read sample data from file
+	// Read sample data from file and reset data
 	queryBytes, err := os.ReadFile("testdata/sample_data.sql")
 	if err != nil {
 		t.Fatalf("failed to read sample_data.sql: %v", err)
