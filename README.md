@@ -57,6 +57,15 @@ Push to ECR
 
 Create a new user.
 
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"username":"John123","profileName":"Johnny"}' \
+  http://localhost:8080/users
+
+# response
+{"userId":"23"}
+```
+
 </details>
 
 
@@ -68,6 +77,13 @@ Create a new user.
 
 Get a user
 
+```bash
+curl -X GET http://localhost:8080/users/3
+
+# response
+{"username":"smith","profileName":"John Smith"}
+```
+
 </details>
 
 <details>
@@ -77,6 +93,12 @@ Get a user
 
 Update a user
 
+```bash
+curl -X PUT -H "Content-Type: application/json" \
+  -d '{"username":"smith","profileName":"Elizabeth Smith"}' \
+  http://localhost:8080/users/3
+```
+
 </details>
 
 <details>
@@ -85,6 +107,10 @@ Update a user
 </summary>
 
 Delete a user
+
+```bash
+curl -X DELETE http://localhost:8080/users/3
+```
 
 </details>
 
@@ -164,37 +190,56 @@ Delete a comment on a post
 
 </details>
 
-### Follower
+### Followers
 
 <details>
 <summary>
-<code>GET</code> /follower
+<code>GET</code> /followers
 </summary>
 
-Get follwers with pagination
+Get followers with pagination
+
+```bash
+curl -X GET "http://localhost:8080/followers?id=4&last-id=2&size=5&following=true"
+
+#response
+{"userIds":["3","5","6","7","8"],"usernames":["smith","123sarah","321Josh1","1Jjake","theChris"]}
+```
 
 </details>
 
 <details>
 <summary>
-<code>POST</code> /follower
+<code>POST</code> /followers
 </summary>
 
 Create a follower
 
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"followerId":"3","followeeId":"5"}' \
+  http://localhost:8080/followers
+```
+
 </details>
 
 <details>
 <summary>
-<code>DELETE</code> /follower
+<code>DELETE</code> /followers
 </summary>
 
 Delete a following relationship
 
+```bash
+curl -X DELETE -H "Content-Type: application/json" \
+  -d '{"followerId":"4","followeeId":"5"}' \
+  http://localhost:8080/followers
+```
+
 </details>
 
 
-### NewsFeed
+### NewsFeed (TODO)
 
 <details>
 <summary>
