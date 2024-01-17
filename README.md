@@ -2,7 +2,10 @@
 
 ## About
 An example social media backend using AWS. This project demonstrates the use of an API using a ECS cluster and RDS
-backend. The project is designed for use with a hybid of local and cloud development.
+backend. The API is publicly accessible using a custom domain configuration for API gateway. The API
+gateway uses a VPC link to reach a services within a private VPC across multiple subnets.
+Traffic is sent to an application load balancer then to ECS. ECS uses Secrets Manager to obtain credentials to connect to RDS.
+  The project is designed for use with a hybrid of local and cloud development.
 
 ![sample image](./diagram.drawio.png)
 
