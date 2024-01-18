@@ -46,6 +46,10 @@ Push to ECR
 
 `docker push <ecr-repo-url>:latest`
 
+### Optional
+
+Taskfiles have been included in the project to quickly run preconfigured build and run scripts. Install taskfile and run `task --list-all` to view commands available in a given directory.
+
 ## API Usage
 
 ### Users
@@ -62,7 +66,7 @@ curl -X POST -H "Content-Type: application/json" \
   -d '{"username":"John123","profileName":"Johnny"}' \
   http://localhost:8080/users
 
-# response
+# Response
 {"userId":"23"}
 ```
 
@@ -80,7 +84,7 @@ Get a user
 ```bash
 curl -X GET http://localhost:8080/users/3
 
-# response
+# Response
 {"username":"smith","profileName":"John Smith"}
 ```
 
@@ -123,6 +127,13 @@ curl -X DELETE http://localhost:8080/users/3
 
 Get posts
 
+```bash
+curl -X GET "http://localhost:8080/posts?id=1&last-id=0&size=5"
+
+# Response
+[{"postId":"4","body":"example post","likes":0},{"postId":"3","body":"another example post","likes":0},{"postId":"2","body":"post by user 1","likes":0},{"postId":"1","body":"yet another example post","likes":0}]
+```
+
 </details>
 
 <details>
@@ -131,6 +142,15 @@ Get posts
 </summary>
 
 Create a new post
+
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"userId":"4","body":"test post"}' \
+  http://localhost:8080/posts
+
+# Response
+{"postId":"123"}
+```
 
 </details>
 
@@ -141,6 +161,12 @@ Create a new post
 
 Update a post
 
+```bash
+curl -X PUT -H "Content-Type: application/json" \
+  -d '{"body":"edited post"}' \
+  http://localhost:8080/posts/123
+```
+
 </details>
 
 <details>
@@ -149,6 +175,10 @@ Update a post
 </summary>
 
 Delete a post
+
+```bash
+curl -X DELETE http://localhost:8080/posts/123
+```
 
 </details>
 
@@ -161,6 +191,13 @@ Delete a post
 
 Get comments from a post with pagination
 
+```bash
+curl -X GET "http://localhost:8080/comments?id=2&last-id=1&size=5"
+
+# Response
+[{"postId":"2","username":"molly1234","body":"comment 5"},{"postId":"2","username":"molly1234","body":"comment 4"},{"postId":"2","username":"molly1234","body":"comment 3"},{"postId":"2","username":"molly1234","body":"comment 2"},{"postId":"2","username":"molly1234","body":"comment 1"}]
+```
+
 </details>
 
 <details>
@@ -169,6 +206,15 @@ Get comments from a post with pagination
 </summary>
 
 Create a new comment on a post
+
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"userId":"5","postId":"3","body":"test comment"}' \
+  http://localhost:8080/comments
+
+# Response
+{"commentId":"123"}
+```
 
 </details>
 
@@ -179,6 +225,12 @@ Create a new comment on a post
 
 Update a comment on a post
 
+```bash
+curl -X PUT -H "Content-Type: application/json" \
+  -d '{"body":"updated comment"}' \
+  http://localhost:8080/comments/123
+```
+
 </details>
 
 <details>
@@ -187,6 +239,10 @@ Update a comment on a post
 </summary>
 
 Delete a comment on a post
+
+```bash
+curl -X DELETE http://localhost:8080/comments/11
+```
 
 </details>
 
@@ -202,7 +258,7 @@ Get followers with pagination
 ```bash
 curl -X GET "http://localhost:8080/followers?id=4&last-id=2&size=5&following=true"
 
-#response
+#Response
 {"userIds":["3","5","6","7","8"],"usernames":["smith","123sarah","321Josh1","1Jjake","theChris"]}
 ```
 
