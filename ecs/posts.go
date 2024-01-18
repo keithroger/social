@@ -54,11 +54,10 @@ type GetPostsResp struct {
 
 // getPostsHandler gets posts made by a user
 func getPostsHandler(w http.ResponseWriter, req *http.Request) {
-	// Get query queryParams
-	queryParams := mux.Vars(req)
-
-	// Get size query param and convert to string
-	size, err := strconv.Atoi(queryParams["size"])
+	// Get query parameters
+	id := req.URL.Query().Get("id")
+	lastId := req.URL.Query().Get("last-id")
+	size, err := strconv.Atoi(req.URL.Query().Get("size"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,7 +73,7 @@ func getPostsHandler(w http.ResponseWriter, req *http.Request) {
 		LIMIT $3`
 
 	// Query Database
-	rows, err := db.Query(query, queryParams["id"], queryParams["last-id"], queryParams["size"])
+	rows, err := db.Query(query, id, lastId, size)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

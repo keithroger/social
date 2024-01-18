@@ -43,6 +43,26 @@ func main() {
 	r.HandleFunc("/users/{id:[0-9]+}", updateUserHandler).Methods(http.MethodPut)
 	r.HandleFunc("/users/{id:[0-9]+}", deleteUserHandler).Methods(http.MethodDelete)
 
+	// /posts api handlers
+	r.HandleFunc("/posts", getPostsHandler).Methods(http.MethodGet).Queries("id", "", "last-id", "", "size", "")
+	r.HandleFunc("/posts", createPostHandler).Methods(http.MethodPost)
+	r.HandleFunc("/posts/{id:[0-9]+}", updatePostHandler).Methods(http.MethodPut)
+	r.HandleFunc("/posts/{id:[0-9]+}", deletePostHandler).Methods(http.MethodDelete)
+
+	// /comments api handlers
+	r.HandleFunc("/comments", getCommentsHandler).Methods(http.MethodGet).Queries("id", "", "last-id", "", "size", "")
+	r.HandleFunc("/comments", createCommentHandler).Methods(http.MethodPost)
+	r.HandleFunc("/comments/{id:[0-9]+}", updateCommentHandler).Methods(http.MethodPut)
+	r.HandleFunc("/comments/{id:[0-9]+}", deleteCommentHandler).Methods(http.MethodDelete)
+
+	// /follower api handlers
+	r.HandleFunc("/followers", getFollowersHandler).Methods(http.MethodGet).Queries("id", "", "last-id", "", "size", "", "following", "")
+	r.HandleFunc("/followers", createFollowerHandler).Methods(http.MethodPost)
+	r.HandleFunc("/followers", deleteFollowerHandler).Methods(http.MethodDelete)
+
+	// TODO create feed api handler
+	// /feed api handler
+
 	// health check
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {})
 

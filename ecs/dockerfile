@@ -5,7 +5,6 @@ WORKDIR /app
 
 # Download Go files
 COPY go.mod go.sum *.go ./
-COPY posts/ ./posts/
 
 # COPY . .
 

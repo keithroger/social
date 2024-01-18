@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 type CreateFollowerReq struct {
@@ -44,11 +42,12 @@ type GetFollowersResp struct {
 
 // getUserHandler gets a user
 func getFollowersHandler(w http.ResponseWriter, req *http.Request) {
-	// Get query queryParams
-	queryParams := mux.Vars(req)
 
-	// Get size query param and convert to string
-	size, err := strconv.Atoi(queryParams["size"])
+	// Get query parameters
+	following := req.URL.Query().Get("following")
+	id := req.URL.Query().Get("id")
+	lastId := req.URL.Query().Get("last-id")
+	size, err := strconv.Atoi(req.URL.Query().Get("size"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -61,7 +60,7 @@ func getFollowersHandler(w http.ResponseWriter, req *http.Request) {
 
 	// If following param is set to true, show who the user is following
 	var query string
-	if queryParams["following"] == "true" {
+	if following == "true" {
 		query = `SELECT users.user_id, users.username FROM followers LEFT JOIN users
 			ON followers.followee_id = users.user_id WHERE follower_id = $1 AND followee_id > $2 ORDER BY user_id
 			LIMIT $3`
@@ -72,7 +71,7 @@ func getFollowersHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Query Database
-	rows, err := db.Query(query, queryParams["id"], queryParams["last-id"], size)
+	rows, err := db.Query(query, id, lastId, size)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
